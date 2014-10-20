@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<article>
+<article xmlns="http://www.doc.org/">
  <titre>Un titre</titre>
  <resume>Ceci est un résumé</resume>
  <motcles>
