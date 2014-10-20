@@ -1,5 +1,9 @@
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+<xsd:schema 
+	xmlns="http://www.doc.org/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	targetNamespace="http://www.doc.org/"
+	elementFormDefault="qualified"
 	 xsi:schemaLocation="http://www.w3.org/2001/XMLSchema file:/D:/Program%20Files%20(x86)/Exchanger%20XML%20Editor%203.3/types/XML%20Schema/Validation/XMLSchema.xsd">
 
 
