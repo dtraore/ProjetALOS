@@ -6,7 +6,6 @@
 package projetalossimple;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,15 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static javafx.application.Platform.exit;
-import javax.xml.bind.JAXBContext;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventLocator;
-import javax.xml.bind.util.ValidationEventCollector;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -35,8 +25,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import metier.ArticleType;
-import org.xml.sax.SAXException;
+
 
 /**
  *
@@ -57,8 +46,7 @@ public class ProjetAlosSimple {
             
             //Validation du fichier xml
             XMLInputFactory xmlif = XMLInputFactory.newInstance();
-            xmlif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,
-                    Boolean.FALSE);
+            xmlif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,Boolean.FALSE);
             SchemaFactory schemaFactory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
             Schema schemaGrammar = schemaFactory.newSchema(new File("Projet.xsd"));
             Validator schemaValidator = schemaGrammar.newValidator();
@@ -75,53 +63,72 @@ public class ProjetAlosSimple {
             
             //Extraction des mots-clés
             while (xmlr.hasNext()){
-            int eventType = xmlr.next();
-            if(eventType==XMLEvent.START_ELEMENT){
-                if(xmlr.getLocalName().equals("motcle")){
-                    pre=xmlr.getLocalName();
+                int eventType = xmlr.next();
+                if(eventType==XMLEvent.START_ELEMENT){
+                    if(xmlr.getLocalName().equals("motcle")){
+                        pre=xmlr.getLocalName();
+                        while(xmlr.hasNext()){
+                            int event = xmlr.next();
+                            if(event==XMLEvent.CHARACTERS){
+                                list.add(xmlr.getText());
+                            }
+                        break;  
+                        }
+                    }
                 }
-                else pre="";
             }
-            if(pre.equals("motcle")){
-                if(eventType==XMLEvent.CHARACTERS){
-                    list.add(xmlr.getText());
-                    //System.out.println(xmlr.getText());
-                }
-            }
-        }
-            }
+         }
           catch (Exception e) {
               System.out.println("Document pas valide");
               return 0;
                 }
-       /*for(Object o: list)
-           System.out.println(o.toString());*/
        listFiles.add(list);
        return iden;
     }
     
-    public static String rechercheDocument(String[] keysWord, String param) throws XMLStreamException{
-        
+    public static List<String> rechercheDocument(String[] keysWord, String param) throws XMLStreamException{
+        List<String> docs=new ArrayList<String>();
+        //Stockage index fichiers trouver
+        String i=null;
+        String file=null;
         //Recherche dans l'index
         for(List<String> f:listFiles){ 
             for(String o:f){
-                if(o.equals(keysWord[0]))
-                    System.out.println(o);
+                if(o.equals(keysWord[0])){
+                    i=f.get(0);
+                    file=f.get(1);
+                }
             }
                 
         }
-                
-        
+               
+        //Parcour du fichier pour récupérer le titre
         XMLInputFactory xmlif = XMLInputFactory.newInstance();
         xmlif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-        Source source = new StreamSource("Projet.xml");
+        Source source = new StreamSource("depotDoc/"+file);
         XMLStreamReader xmlr = xmlif.createXMLStreamReader(source);
         
-        String pre="";
-        String titre="";
-        String[]titres=null;
         
-        return null;
+        String titre="";
+        //Extraction du titre
+        while (xmlr.hasNext()){
+        int eventType = xmlr.next();
+        if(eventType==XMLEvent.START_ELEMENT){
+            if(xmlr.getLocalName().equals("titre")){
+                titre=xmlr.getLocalName();
+                while(xmlr.hasNext()){
+                    int event = xmlr.next();
+                    if(event==XMLEvent.CHARACTERS){
+                        titre="Titre: "+xmlr.getText()+" Identifiant: "+i;
+                        docs.add(titre);
+                    }
+                    break;
+                    }
+                }
+            }  
+        }
+        
+        return docs;
     }
     
     public File retourneDocument(int id){
@@ -144,7 +151,8 @@ public class ProjetAlosSimple {
          }
         String[] keyword={"mot1","mot2"};
         String par="et";
-        System.out.println(rechercheDocument(keyword,par));
+        System.out.println("***************");
+        System.out.println(rechercheDocument(keyword,par).get(0));
     }
     
 }
