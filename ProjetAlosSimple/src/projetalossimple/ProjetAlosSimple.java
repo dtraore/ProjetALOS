@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,13 +30,22 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import metier.ArticleType;
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 import org.xml.sax.SAXException;
+
 
 /**
  *
@@ -131,7 +141,7 @@ public class ProjetAlosSimple {
         for(int i=0; i<listFiles.size();i++)
         {
             
-                if(listFiles.get(i).get(0).equals(String.valueOf(id)))
+                if(listFiles.get(i).get(0).equals(id))
                 {
                     nomDoc=listFiles.get(i).get(1);
                     break;
@@ -145,7 +155,56 @@ public class ProjetAlosSimple {
         return null;
     }
     
-    public void generePDF(int id){
+    public static void generePDF(int id){
+        
+        String nameDoc=retournNomDocument(id);
+            if(nameDoc.equals(""))
+            {
+                System.out.println("Aucune correspondance entre l'id fourni et les documents xml !!!");
+            }
+            else
+            {
+            try
+            {
+
+                String docXmlName=nameDoc.substring(0,nameDoc.length()-4);
+                File xmlfile = new File("depotDoc/"+nameDoc);
+                File xsltfile = new File("schema-Xsl/Projet.xsl");
+                File pdffile = new File("generatedPdf/"+docXmlName+".pdf");
+
+                final FopFactory fopFactory = FopFactory.newInstance();
+                FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+            // configure foUserAgent as desired
+            // Setup output
+                OutputStream out = new java.io.FileOutputStream(pdffile);
+                out = new java.io.BufferedOutputStream(out);
+
+                  try {
+                        // Construct fop with desired output format
+                    Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
+
+                    // Setup XSLT
+                    TransformerFactory factory = TransformerFactory.newInstance();
+                    Transformer transformer = factory.newTransformer(new StreamSource(xsltfile));
+
+                                     // Setup input for XSLT transformation
+                    Source src = new StreamSource(xmlfile);
+
+                                     // Resulting SAX events (the generated FO) must be piped through to FOP
+                    Result res = new SAXResult(fop.getDefaultHandler());
+
+                                            // Start XSLT transformation and FOP processing
+                    transformer.transform(src, res);
+
+                  } finally {
+                        out.close();
+                     }
+            }
+            catch (Exception e) {
+                                      e.printStackTrace(System.err);
+                                      System.exit(-1);
+                              }
+            }
         
     }
     public static void main(String[] args) throws XMLStreamException {
@@ -162,7 +221,10 @@ public class ProjetAlosSimple {
         String par="et";
         System.out.println(rechercheDocument(keyword,par));
         System.out.println("****************************");
-        System.out.println(retournNomDocument(1));
+        System.out.println(retournNomDocument(10));
+        
+        generePDF(10);
+        
         
     }
     
