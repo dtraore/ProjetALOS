@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static javafx.application.Platform.exit;
 import javax.xml.bind.JAXBContext;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
@@ -124,12 +123,29 @@ public class ProjetAlosSimple {
         return null;
     }
     
+    public static String retournNomDocument(int id)
+    {
+        //cette methode permet de retourner le nom du document xml associé à l'id 
+        
+        String nomDoc="";
+        for(int i=0; i<listFiles.size();i++)
+        {
+            
+                if(listFiles.get(i).get(0).equals(String.valueOf(id)))
+                {
+                    nomDoc=listFiles.get(i).get(1);
+                    break;
+                }
+        }   
+        return nomDoc;
+    }
+    
     public File retourneDocument(int id){
         
         return null;
     }
     
-    public void generePDF(File xsltFile, int id){
+    public void generePDF(int id){
         
     }
     public static void main(String[] args) throws XMLStreamException {
@@ -145,6 +161,9 @@ public class ProjetAlosSimple {
         String[] keyword={"mot1","mot2"};
         String par="et";
         System.out.println(rechercheDocument(keyword,par));
+        System.out.println("****************************");
+        System.out.println(retournNomDocument(1));
+        
     }
     
 }
