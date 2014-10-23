@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-<<<<<<< HEAD
-=======
 import javax.xml.bind.JAXBContext;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
@@ -27,7 +25,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventLocator;
 import javax.xml.bind.util.ValidationEventCollector;
->>>>>>> 1c3c71ae3792cc74af010830f69973d9fc360aad
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -41,16 +38,13 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-<<<<<<< HEAD
 
-=======
 import metier.ArticleType;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 import org.xml.sax.SAXException;
->>>>>>> 1c3c71ae3792cc74af010830f69973d9fc360aad
 
 
 /**
@@ -170,13 +164,23 @@ public class ProjetAlosSimple {
                     nomDoc=listFiles.get(i).get(1);
                     break;
                 }
+                
         }   
         return nomDoc;
     }
     
     public File retourneDocument(int id){
+        String nameFile=retournNomDocument(id);
+        if(nameFile.equals(""))
+            {
+               return null; 
+            }
+        else
+        {
+            File xmlfile = new File("depotDoc/"+nameFile);
+            return xmlfile;
+        }
         
-        return null;
     }
     
     public static void generePDF(int id){
@@ -243,10 +247,10 @@ public class ProjetAlosSimple {
          }
         String[] keyword={"mot1","mot2"};
         String par="et";
-<<<<<<< HEAD
+
         System.out.println("***************");
         System.out.println(rechercheDocument(keyword,par).get(0));
-=======
+
         System.out.println(rechercheDocument(keyword,par));
         System.out.println("****************************");
         System.out.println(retournNomDocument(10));
@@ -254,7 +258,6 @@ public class ProjetAlosSimple {
         generePDF(10);
         
         
->>>>>>> 1c3c71ae3792cc74af010830f69973d9fc360aad
     }
     
 }
