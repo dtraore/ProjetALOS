@@ -170,7 +170,8 @@ public class ProjetAlosSimple {
     }
     
     public File retourneDocument(int id){
-        String nameFile=retournNomDocument(id);
+        String nameFile=retournNomDocument(id);//on appelle la methode retournNomDocument, quià partir de l'identifiant 
+                                                //il retourne le nom du document xml associé ou la chainde vide pour dire le contraire
         if(nameFile.equals(""))
             {
                return null; 
@@ -185,7 +186,10 @@ public class ProjetAlosSimple {
     
     public static void generePDF(int id){
         
-        String nameDoc=retournNomDocument(id);
+            // on recupère le nom document associé à l'id  
+            String nameDoc=retournNomDocument(id);
+            
+            //on verifie si il y a un document pour l'id fourni
             if(nameDoc.equals(""))
             {
                 System.out.println("Aucune correspondance entre l'id fourni et les documents xml !!!");
@@ -202,8 +206,8 @@ public class ProjetAlosSimple {
 
                 final FopFactory fopFactory = FopFactory.newInstance();
                 FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
-            // configure foUserAgent as desired
-            // Setup output
+                // configure foUserAgent as desired
+                // Setup output
                 OutputStream out = new java.io.FileOutputStream(pdffile);
                 out = new java.io.BufferedOutputStream(out);
 
