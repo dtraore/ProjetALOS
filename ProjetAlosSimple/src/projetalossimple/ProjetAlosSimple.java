@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
@@ -58,6 +59,7 @@ public class ProjetAlosSimple {
     //Depose un document dans le serveur
     public static int depotDocument(String nameFile, byte[] contenu) throws FileNotFoundException, IOException{
         List<String> list=new ArrayList<String>();
+        int Id;
 	try {
              //Convertir byte to file
             FileOutputStream fileOuputStream = new FileOutputStream("depotDoc/"+nameFile+".xml"); 
@@ -76,9 +78,13 @@ public class ProjetAlosSimple {
             schemaValidator.validate(source);
             
             //Ajout pour l'indexation
-            iden=iden+1;
+            //Génération de l'dentifiant
+            Random r = new Random();
+            Id = iden + r.nextInt(1000 - iden);
+            //System.out.println(Id);
+            
             String pre="";
-            list.add(String.valueOf(iden));
+            list.add(String.valueOf(Id));
             list.add(nameFile+".xml");
             
             //Extraction des mots-clés
@@ -103,54 +109,72 @@ public class ProjetAlosSimple {
               return 0;
                 }
        listFiles.add(list);
-       return iden;
+       return Id;
     }
     
-    public static List<String> rechercheDocument(String[] keysWord, String param) throws XMLStreamException{
-        List<String> docs=new ArrayList<String>();
+    public static List<List<String>> rechercheDocument(String[] keysWord, String param) throws XMLStreamException{
+        List<List<String>> docs=new ArrayList<List<String>>();
+        List<String>doc=new ArrayList<String>();
         //Stockage index fichiers trouver
-        String i=null;
-        String file=null;
+        List<String> idFile=new ArrayList<String>();
+        List<String> file=new ArrayList<String>();
+        
         //Recherche dans l'index
-        for(List<String> f:listFiles){ 
-            for(String o:f){
-                if(o.equals(keysWord[0])){
-                    i=f.get(0);
-                    file=f.get(1);
+        for(List<String> f:listFiles){
+            //Les mots-clés sont reliés par et
+                if(param.equals("et") && f.size()==3){
+                    if(f.get(2).equals(keysWord[0]) || f.get(2).equals(keysWord[1] ))
+                        idFile.add(f.get(0));
+                        file.add(f.get(1));
                 }
+                if(param.equals("et") && f.size()!=3){
+                    if(f.get(2).equals(keysWord[0]) && f.get(3).equals(keysWord[1]))
+                        idFile.add(f.get(0));
+                        file.add(f.get(1));
+                }
+            //Les mots-clés sont reliés par ou
+                if(param.equals("ou") && f.size()==3){
+                    if(f.get(2).equals(keysWord[0]) || f.get(2).equals(keysWord[1] ))
+                        idFile.add(f.get(0));
+                        file.add(f.get(1));
+                }
+                if(param.equals("ou") && f.size()!=3){
+                    if(f.get(2).equals(keysWord[0]) || f.get(3).equals(keysWord[1]))
+                        idFile.add(f.get(0));
+                        file.add(f.get(1));
+                }
+            //}
+        }
+        //Parcour des fichiers pour récupérer le titre
+        for(String s: file){  
+            //System.out.println(s);
+            
+            XMLInputFactory xmlif = XMLInputFactory.newInstance();
+            xmlif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+            Source source = new StreamSource("depotDoc/"+s);
+            XMLStreamReader xmlr = xmlif.createXMLStreamReader(source);
+            String titre="";
+            //Extraction du titre
+            while (xmlr.hasNext()){
+                int eventType = xmlr.next();
+                if(eventType==XMLEvent.START_ELEMENT){
+                    if(xmlr.getLocalName().equals("titre")){
+                        titre=xmlr.getLocalName();
+                        while(xmlr.hasNext()){
+                            int event = xmlr.next();
+                             if(event==XMLEvent.CHARACTERS){
+                                titre="Titre: "+xmlr.getText()+" Identifiant: "+idFile.get(0);
+                                doc.add(titre);
+                            }
+                            break;
+                        }
+                    }
+                }  
             }
-                
         }
-               
-        //Parcour du fichier pour récupérer le titre
-        XMLInputFactory xmlif = XMLInputFactory.newInstance();
-        xmlif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-        Source source = new StreamSource("depotDoc/"+file);
-        XMLStreamReader xmlr = xmlif.createXMLStreamReader(source);
-        
-        
-        String titre="";
-        //Extraction du titre
-        while (xmlr.hasNext()){
-        int eventType = xmlr.next();
-        if(eventType==XMLEvent.START_ELEMENT){
-            if(xmlr.getLocalName().equals("titre")){
-                titre=xmlr.getLocalName();
-                while(xmlr.hasNext()){
-                    int event = xmlr.next();
-                    if(event==XMLEvent.CHARACTERS){
-                        titre="Titre: "+xmlr.getText()+" Identifiant: "+i;
-                        docs.add(titre);
-                    }
-                    break;
-                    }
-                }
-            }  
-        }
-        
+        docs.add(doc);
         return docs;
     }
-    
     public static String retournNomDocument(int id)
     {
         //cette methode permet de retourner le nom du document xml associé à l'id 
@@ -237,31 +261,6 @@ public class ProjetAlosSimple {
                                       System.exit(-1);
                               }
             }
-        
-    }
-    public static void main(String[] args) throws XMLStreamException {
-         try {
-             //Convertion file en byte
-             Path path = Paths.get("Projet.xml");
-             byte[] data = Files.readAllBytes(path);
-             int i=depotDocument("name",data);
-             //System.out.println(i);
-         } catch (IOException ex) {
-             Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
-         }
-        String[] keyword={"mot1","mot2"};
-        String par="et";
-
-        System.out.println("***************");
-        System.out.println(rechercheDocument(keyword,par).get(0));
-
-        System.out.println(rechercheDocument(keyword,par));
-        System.out.println("****************************");
-        System.out.println(retournNomDocument(10));
-        
-        generePDF(10);
-        
-        
     }
     
 }
