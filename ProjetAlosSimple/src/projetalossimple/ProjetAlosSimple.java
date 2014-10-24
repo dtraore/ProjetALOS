@@ -169,7 +169,7 @@ public class ProjetAlosSimple {
         return nomDoc;
     }
     
-    public File retourneDocument(int id){
+    public static File retourneDocument(int id){
         String nameFile=retournNomDocument(id);//on appelle la methode retournNomDocument, quià partir de l'identifiant 
                                                 //il retourne le nom du document xml associé ou la chainde vide pour dire le contraire
         if(nameFile.equals(""))
