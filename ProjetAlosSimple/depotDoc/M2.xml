@@ -1,0 +1,9 @@
+﻿<?xml version="1.0"?>
+<article xmlns="http://www.doc.org/">
+ 
+ <!-- Pour chaque section, l'attribut 'titre' est obligatoire
+      et le contenu de la section doit etre du type xs:string -->
+ <section titre="introduction">Du texte...</section>
+ <section titre="corps">Du texte...</section>
+ <section titre="conclusion">Du texte...</section>
+</article>
