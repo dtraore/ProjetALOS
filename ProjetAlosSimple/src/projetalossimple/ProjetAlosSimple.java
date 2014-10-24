@@ -6,14 +6,18 @@
 package projetalossimple;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -40,11 +44,11 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import metier.ArticleType;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
-import org.apache.fop.apps.MimeConstants;
+import org.apache.xmlgraphics.util.MimeConstants;
+
 import org.xml.sax.SAXException;
 
 
@@ -59,6 +63,7 @@ public class ProjetAlosSimple {
     //Depose un document dans le serveur
     public static int depotDocument(String nameFile, byte[] contenu) throws FileNotFoundException, IOException{
         List<String> list=new ArrayList<String>();
+        
         int Id;
 	try {
              //Convertir byte to file
@@ -112,46 +117,41 @@ public class ProjetAlosSimple {
        return Id;
     }
     
-    public static List<List<String>> rechercheDocument(String[] keysWord, String param) throws XMLStreamException{
-        List<List<String>> docs=new ArrayList<List<String>>();
-        List<String>doc=new ArrayList<String>();
-        //Stockage index fichiers trouver
-        List<String> idFile=new ArrayList<String>();
-        List<String> file=new ArrayList<String>();
+    public static String[] rechercheDocument(String[] keysWord, String param) throws XMLStreamException{
         
-        //Recherche dans l'index
+        HashMap<String, String> files = new HashMap<String, String>();
+        int doc=0;
         for(List<String> f:listFiles){
             //Les mots-clés sont reliés par et
-                if(param.equals("et") && f.size()==3){
-                    if(f.get(2).equals(keysWord[0]) || f.get(2).equals(keysWord[1] ))
-                        idFile.add(f.get(0));
-                        file.add(f.get(1));
-                }
                 if(param.equals("et") && f.size()!=3){
-                    if(f.get(2).equals(keysWord[0]) && f.get(3).equals(keysWord[1]))
-                        idFile.add(f.get(0));
-                        file.add(f.get(1));
+                    for(int i=2; i<f.size();i++){
+                        if(f.get(i).equals(keysWord[0])){
+                            for(int j=2;j<f.size();j++){
+                                if(f.get(j).equals(keysWord[1])){
+                                   files.put(f.get(0),f.get(1));
+                                }
+                            }
+                        }
+                    }
                 }
             //Les mots-clés sont reliés par ou
                 if(param.equals("ou") && f.size()==3){
                     if(f.get(2).equals(keysWord[0]) || f.get(2).equals(keysWord[1] ))
-                        idFile.add(f.get(0));
-                        file.add(f.get(1));
+                        files.put(f.get(0),f.get(1));
                 }
                 if(param.equals("ou") && f.size()!=3){
-                    if(f.get(2).equals(keysWord[0]) || f.get(3).equals(keysWord[1]))
-                        idFile.add(f.get(0));
-                        file.add(f.get(1));
+                    for(int i=2; i<f.size();i++){
+                        if(f.get(i).equals(keysWord[0])||f.get(i).equals(keysWord[1])){
+                            files.put(f.get(0),f.get(1));
+                        }
+                    }
                 }
-            //}
         }
-        //Parcour des fichiers pour récupérer le titre
-        for(String s: file){  
-            //System.out.println(s);
-            
+        String[] docs=new String[files.size()];    
+        for (String mapKey : files.keySet()) {
             XMLInputFactory xmlif = XMLInputFactory.newInstance();
             xmlif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-            Source source = new StreamSource("depotDoc/"+s);
+            Source source = new StreamSource("depotDoc/"+files.get(mapKey));
             XMLStreamReader xmlr = xmlif.createXMLStreamReader(source);
             String titre="";
             //Extraction du titre
@@ -163,20 +163,20 @@ public class ProjetAlosSimple {
                         while(xmlr.hasNext()){
                             int event = xmlr.next();
                              if(event==XMLEvent.CHARACTERS){
-                                titre="Titre: "+xmlr.getText()+" Identifiant: "+idFile.get(0);
-                                doc.add(titre);
+                                    docs[doc]="Titre: "+xmlr.getText()+" Identifiant: "+mapKey;
+                                    //=titre;
+                                    doc++;
+                                    break;
+                                }
                             }
                             break;
                         }
                     }
                 }  
             }
-        }
-        docs.add(doc);
         return docs;
     }
-    public static String retournNomDocument(int id)
-    {
+    public static String retournNomDocument(int id){
         //cette methode permet de retourner le nom du document xml associé à l'id 
         
         String nomDoc="";
@@ -194,8 +194,9 @@ public class ProjetAlosSimple {
     }
     
     public static File retourneDocument(int id){
-        String nameFile=retournNomDocument(id);//on appelle la methode retournNomDocument, quià partir de l'identifiant 
-                                                //il retourne le nom du document xml associé ou la chainde vide pour dire le contraire
+        String nameFile=retournNomDocument(id);
+        //on appelle la methode retournNomDocument, quià partir de l'identifiant 
+        //il retourne le nom du document xml associé ou la chainde vide pour dire le contraire
         if(nameFile.equals(""))
             {
                return null; 
@@ -261,6 +262,48 @@ public class ProjetAlosSimple {
                                       System.exit(-1);
                               }
             }
+    }
+    public static void arret(){
+        ObjectOutputStream oos =  null ;
+         try {
+             File fichier =  new File("index") ;
+             // ouverture d'un flux sur un fichier
+             oos = new ObjectOutputStream(new FileOutputStream(fichier));
+             // création d'un objet à sérializer
+             Index ind =  new Index() ;
+             ind.setIndex(listFiles);
+             // sérialization de l'objet
+             oos.writeObject(ind) ;
+         } catch (IOException ex) {
+             Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
+         } finally {
+             try {
+                 oos.close();
+             } catch (IOException ex) {
+                 Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
+             }
+         }
+    }
+    public static void demarrage(){
+        ObjectInputStream ois =  null ;
+         try {
+             File fichier =  new File("index") ;
+             // ouverture d'un flux sur un fichier
+             ois = new ObjectInputStream(new FileInputStream(fichier));
+             // désérialization de l'objet
+             Index ind = (Index)ois.readObject() ;
+             listFiles=ind.getIndex();
+         } catch (IOException ex) {
+             Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (ClassNotFoundException ex) {
+             Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
+         } finally {
+             try {
+                 ois.close();
+             } catch (IOException ex) {
+                 Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
+             }
+         }
     }
     
 }

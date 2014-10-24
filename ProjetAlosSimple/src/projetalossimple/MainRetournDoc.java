@@ -13,7 +13,7 @@ import java.io.File;
 public class MainRetournDoc {
     public static void main(String [] args)
     {
-        File fXml=ProjetAlosSimple.retourneDocument(1);
+        File fXml=ProjetAlosSimple.retourneDocument(892);
                 
     }
     

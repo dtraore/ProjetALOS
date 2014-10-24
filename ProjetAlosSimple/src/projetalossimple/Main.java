@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
+import static projetalossimple.ProjetAlosSimple.arret;
 import static projetalossimple.ProjetAlosSimple.depotDocument;
 
 /**
@@ -23,25 +24,24 @@ public class Main {
     public static void main(String[] args) throws XMLStreamException {
          try {
              //Convertion file en byte
-             Path path = Paths.get("M2.xml");
+             Path path = Paths.get("test.xml");
              byte[] data = Files.readAllBytes(path);
-             int i=ProjetAlosSimple.depotDocument("M2",data);
+             int i=ProjetAlosSimple.depotDocument("test",data);
              path = Paths.get("Projet.xml");
              data = Files.readAllBytes(path);
              i=ProjetAlosSimple.depotDocument("test",data);
-             //System.out.println(i);
-             //arret();
+             arret();
              //demarrage();
          } catch (IOException ex) {
              Logger.getLogger(ProjetAlosSimple.class.getName()).log(Level.SEVERE, null, ex);
          }
-       String[] keyword={"mot1","mot2"};
-        String par="ou";
+        String[] keyword={"mot1","mot2"};
+        String par="et";
         System.out.println("***************");
-        for(List<String> doc:ProjetAlosSimple.rechercheDocument(keyword,par)){
-            for(String s:doc)
-                System.out.println(s);
+        String[] doc=ProjetAlosSimple.rechercheDocument(keyword,par);
+        System.out.println(doc[0]);
+                
         }
     }
-                }
+       
    

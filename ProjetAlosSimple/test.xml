@@ -1,6 +1,13 @@
 ﻿<?xml version="1.0"?>
 <article xmlns="http://www.doc.org/">
- 
+ <titre>Moi</titre>
+ <resume>Ceci est un résumé</resume>
+ <motcles>
+     <!-- au moins un mot-cle -->
+     <motcle>mot1</motcle>
+     <motcle>mot2</motcle>
+	 <motcle>mot3</motcle>
+ </motcles>
  <!-- Pour chaque section, l'attribut 'titre' est obligatoire
       et le contenu de la section doit etre du type xs:string -->
  <section titre="introduction">Du texte...</section>
